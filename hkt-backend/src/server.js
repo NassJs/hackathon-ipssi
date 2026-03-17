@@ -9,6 +9,8 @@ dotenv.config();
 const { router: healthRouter } = require("./routes/health");
 const { router: usersRouter } = require("./routes/users");
 const { router: authRouter } = require("./routes/auth");
+const path = require("path");
+const { router: documentsRouter } = require("./routes/documents");
 
 const app = express();
 
@@ -25,6 +27,14 @@ app.get("/", (req, res) => {
 app.use("/health", healthRouter);
 app.use("/auth", authRouter);
 app.use("/users", usersRouter);
+app.use("/documents", documentsRouter);
+
+app.use((err, req, res, next) => {
+  console.error("[api] error:", err);
+  res.status(500).json({ ok: false, error: "INTERNAL_ERROR" });
+});
+
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use((err, req, res, next) => {
   console.error("[api] error:", err);
