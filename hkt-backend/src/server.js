@@ -8,6 +8,7 @@ dotenv.config();
 
 const { router: healthRouter } = require("./routes/health");
 const { router: usersRouter } = require("./routes/users");
+const { router: authRouter } = require("./routes/auth");
 
 const app = express();
 
@@ -22,12 +23,10 @@ app.get("/", (req, res) => {
 });
 
 app.use("/health", healthRouter);
+app.use("/auth", authRouter);
 app.use("/users", usersRouter);
 
-// Basic error handler
-// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  // eslint-disable-next-line no-console
   console.error("[api] error:", err);
   res.status(500).json({ ok: false, error: "INTERNAL_ERROR" });
 });
