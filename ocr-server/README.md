@@ -18,9 +18,24 @@ pip install -e .
 ## Lancement en local
 
 ```bash
+cd ocr-server
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Si vous lancez le serveur depuis le dossier `app/`, utilisez :
+
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ## Endpoint de vérification
 
-- `GET /health`
+- `POST /ocr`
+
+Exemple de payload JSON pour `/ocr` :
+
+```json
+{
+  "image_base64": "iVBORw0KGgoAAAANSUhEUgAA..."
+}
+```
