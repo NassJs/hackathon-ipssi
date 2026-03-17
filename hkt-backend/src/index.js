@@ -10,13 +10,11 @@ async function main() {
 
   const server = http.createServer(app);
   server.listen(PORT, "0.0.0.0", () => {
-    // eslint-disable-next-line no-console
     console.log(`[api] listening on :${PORT}`);
   });
 }
 
 main().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error("[api] fatal error:", err);
   process.exitCode = 1;
 });

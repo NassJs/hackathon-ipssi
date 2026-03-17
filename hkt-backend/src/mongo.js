@@ -9,7 +9,6 @@ async function connectToMongo() {
     serverSelectionTimeoutMS: 10_000
   });
 
-  // eslint-disable-next-line no-console
   console.log("[mongo] connected");
 }
 
