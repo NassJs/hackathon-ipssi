@@ -11,6 +11,7 @@ const { router: usersRouter } = require("./routes/users");
 const { router: authRouter } = require("./routes/auth");
 const path = require("path");
 const { router: documentsRouter } = require("./routes/documents");
+const { router: adminRouter } = require("./routes/admin");
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/health", healthRouter);
 app.use("/auth", authRouter);
 app.use("/users", usersRouter);
 app.use("/documents", documentsRouter);
+app.use("/admin", adminRouter);
 
 app.use((err, req, res, next) => {
   console.error("[api] error:", err);
