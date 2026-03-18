@@ -5,6 +5,7 @@ import { uploadDocument, analyseDocument } from "../api";
 const TYPE_LABELS = {
   facture: "Facture",
   devis: "Devis",
+  bon_commande: "Bon de commande",
   attestation: "Attestation",
   kbis: "Extrait Kbis",
   rib: "RIB",
@@ -14,10 +15,17 @@ const TYPE_LABELS = {
 const TYPE_COLORS = {
   facture: "badge-success",
   devis: "badge-neutral",
+  bon_commande: "badge-neutral",
   attestation: "badge-warning",
   kbis: "badge-neutral",
   rib: "badge-neutral",
   autre: "badge-neutral",
+};
+
+const CONFORMITY_CONFIG = {
+  conforme: { label: "Conforme", color: "badge-success" },
+  a_verifier: { label: "À vérifier", color: "badge-warning" },
+  non_conforme: { label: "Non valide", color: "badge-error" },
 };
 
 export default function UploadPage({ token }) {
@@ -139,13 +147,20 @@ export default function UploadPage({ token }) {
           <div className="results-grid">
             {results.map((doc) => (
               <div key={doc._id} className="result-card glass">
+                {(() => {
+                  const conformityStatus = typeof doc.conformity?.status === "string" ? doc.conformity.status : null;
+                  const conformity = (conformityStatus && CONFORMITY_CONFIG[conformityStatus]) || null;
+                  return (
                 <div className="result-header">
                   <FileText size={16} color="var(--accent)" />
                   <span className="result-name">{doc.name}</span>
                   <span className={`badge ${TYPE_COLORS[doc.type] || "badge-neutral"}`}>
                     {TYPE_LABELS[doc.type] || doc.type}
                   </span>
+                  {conformity && <span className={`badge ${conformity.color}`}>{conformity.label}</span>}
                 </div>
+                  );
+                })()}
 
                 {doc.extracted_data && (
                   <div className="result-fields">
@@ -207,6 +222,7 @@ export default function UploadPage({ token }) {
 }
 
 function Flag({ ok, label }) {
+  if (ok === undefined || ok === null) return null;
   return (
     <span className={`badge ${ok ? "badge-success" : "badge-error"}`}>
       {ok ? <CheckCircle size={11} /> : <AlertCircle size={11} />}

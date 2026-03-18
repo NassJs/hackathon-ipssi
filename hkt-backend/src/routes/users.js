@@ -12,7 +12,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", async (req, res, _next) => {
   return res.status(403).json({
     ok: false,
     error: "FORBIDDEN",

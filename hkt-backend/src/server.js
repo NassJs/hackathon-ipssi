@@ -31,14 +31,14 @@ app.use("/users", usersRouter);
 app.use("/documents", documentsRouter);
 app.use("/admin", adminRouter);
 
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   console.error("[api] error:", err);
   res.status(500).json({ ok: false, error: "INTERNAL_ERROR" });
 });
 
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   console.error("[api] error:", err);
   res.status(500).json({ ok: false, error: "INTERNAL_ERROR" });
 });

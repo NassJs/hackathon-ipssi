@@ -2,7 +2,14 @@ import { ArrowLeft, CheckCircle, AlertCircle, FileText } from "lucide-react";
 
 const TYPE_LABELS = {
   facture: "Facture", devis: "Devis", attestation: "Attestation",
+  bon_commande: "Bon de commande",
   kbis: "Extrait Kbis", rib: "RIB", autre: "Autre",
+};
+
+const CONFORMITY_CONFIG = {
+  conforme: { label: "Conforme", color: "badge-success" },
+  a_verifier: { label: "À vérifier", color: "badge-warning" },
+  non_conforme: { label: "Non valide", color: "badge-error" },
 };
 
 function Field({ label, value, warn }) {
@@ -16,6 +23,7 @@ function Field({ label, value, warn }) {
 }
 
 function Flag({ ok, label }) {
+  if (ok === undefined || ok === null) return null;
   return (
     <span className={`badge ${ok ? "badge-success" : "badge-error"}`}>
       {ok ? <CheckCircle size={11} /> : <AlertCircle size={11} />}
@@ -29,6 +37,11 @@ export default function DocumentDetailPage({ doc, onBack }) {
 
   const d = doc.extracted_data || {};
   const v = doc.verification_flags || {};
+  const conformity = doc.conformity || {};
+  const conformityStatus = typeof conformity.status === "string" ? conformity.status : null;
+  const conformityUi = (conformityStatus && CONFORMITY_CONFIG[conformityStatus]) || null;
+  const missingFields = Array.isArray(conformity.missing_fields) ? conformity.missing_fields : [];
+  const invalidFields = Array.isArray(conformity.invalid_fields) ? conformity.invalid_fields : [];
 
   const isExpired = d.date_expiration && new Date(d.date_expiration) < new Date();
 
@@ -80,9 +93,35 @@ export default function DocumentDetailPage({ doc, onBack }) {
             </p>
           ) : (
             <div className="verif-flags" style={{ marginTop: 12 }}>
-              {v.sirene_valid !== undefined && <Flag ok={v.sirene_valid} label="SIRET valide (SIRENE)" />}
-              {v.date_valid !== undefined && <Flag ok={v.date_valid} label="Date valide" />}
-              {v.siret_match !== undefined && <Flag ok={v.siret_match} label="SIRET cohérent" />}
+              <Flag ok={v.sirene_valid} label="SIRET valide" />
+              <Flag ok={v.date_valid} label="Date valide" />
+              <Flag ok={v.siret_match} label="SIRET cohérent" />
+            </div>
+          )}
+
+          <div className="panel-title" style={{ marginTop: 20 }}>Conformité</div>
+          <div style={{ marginTop: 8 }}>
+            {conformityUi ? (
+              <span className={`badge ${conformityUi.color}`}>{conformityUi.label}</span>
+            ) : (
+              <span className="badge badge-neutral">Inconnu</span>
+            )}
+          </div>
+
+          {(missingFields.length > 0 || invalidFields.length > 0) && (
+            <div className="result-fields" style={{ marginTop: 10 }}>
+              {missingFields.length > 0 && (
+                <div className="field-row">
+                  <span>Champs manquants</span>
+                  <strong style={{ color: "var(--error)" }}>{missingFields.join(", ")}</strong>
+                </div>
+              )}
+              {invalidFields.length > 0 && (
+                <div className="field-row">
+                  <span>Champs invalides</span>
+                  <strong style={{ color: "var(--error)" }}>{invalidFields.join(", ")}</strong>
+                </div>
+              )}
             </div>
           )}
 

@@ -5,6 +5,7 @@ import { getDocuments, deleteDocument } from "../api";
 const TYPE_LABELS = {
   facture: "Facture",
   devis: "Devis",
+  bon_commande: "Bon de commande",
   attestation: "Attestation",
   kbis: "Extrait Kbis",
   rib: "RIB",
@@ -14,6 +15,7 @@ const TYPE_LABELS = {
 const TYPE_COLORS = {
   facture: "badge-success",
   devis: "badge-neutral",
+  bon_commande: "badge-neutral",
   attestation: "badge-warning",
   kbis: "badge-neutral",
   rib: "badge-neutral",
@@ -25,6 +27,12 @@ const STATUS_CONFIG = {
   processing: { label: "En cours",     color: "badge-warning",  Icon: RefreshCw },
   validated:  { label: "Validé",       color: "badge-success",  Icon: CheckCircle },
   error:      { label: "Erreur",       color: "badge-error",    Icon: XCircle },
+};
+
+const CONFORMITY_CONFIG = {
+  conforme: { label: "Conforme", color: "badge-success" },
+  a_verifier: { label: "À vérifier", color: "badge-warning" },
+  non_conforme: { label: "Non valide", color: "badge-error" },
 };
 
 function formatDate(dateString) {
@@ -99,6 +107,7 @@ export default function DocumentsPage({ token, onView }) {
                   <th>Nom</th>
                   <th>Type</th>
                   <th>Statut</th>
+                  <th>Conformité</th>
                   <th>SIRET</th>
                   <th>Montant TTC</th>
                   <th>Uploadé le</th>
@@ -109,6 +118,8 @@ export default function DocumentsPage({ token, onView }) {
                 {documents.map((doc) => {
                   const status = STATUS_CONFIG[doc.status] || STATUS_CONFIG.pending;
                   const StatusIcon = status.Icon;
+                  const conformityStatus = typeof doc.conformity?.status === "string" ? doc.conformity.status : null;
+                  const conformity = (conformityStatus && CONFORMITY_CONFIG[conformityStatus]) || null;
                   return (
                     <tr key={doc._id}>
                       <td>
@@ -127,6 +138,13 @@ export default function DocumentsPage({ token, onView }) {
                           <StatusIcon size={11} />
                           {status.label}
                         </span>
+                      </td>
+                      <td>
+                        {conformity ? (
+                          <span className={`badge ${conformity.color}`}>{conformity.label}</span>
+                        ) : (
+                          <span className="badge badge-neutral">-</span>
+                        )}
                       </td>
                       <td style={{ fontSize: "0.85rem" }}>
                         {doc.extracted_data?.siret || "-"}

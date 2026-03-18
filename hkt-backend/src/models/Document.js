@@ -5,7 +5,7 @@ const documentSchema = new mongoose.Schema(
     name: { type: String, required: true },
     type: { 
       type: String, 
-      enum: ['facture', 'devis', 'attestation', 'kbis', 'rib', 'autre'], 
+      enum: ['facture', 'devis', 'attestation', 'kbis', 'rib', 'bon_commande', 'autre'], 
       default: 'autre' 
     },
     User_id: { 
@@ -28,11 +28,21 @@ const documentSchema = new mongoose.Schema(
       date_emission: Date,
       date_expiration: Date
     },
+    extracted_fields: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
+    },
     verification_flags: {
       sirene_valid: Boolean,
       date_valid: Boolean,
       siret_match: Boolean
-    }
+    },
+    classification_confidence: Number,
+    ocr_confidence: Number,
+    conformity: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
+    },
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" }
