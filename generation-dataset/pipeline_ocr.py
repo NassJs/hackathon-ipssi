@@ -218,8 +218,6 @@ def fetch_recherche_entreprises_random(
     return results
 
 
-
-
 def generate_dossier(
     dossier_id: str,
     faker: Faker,
