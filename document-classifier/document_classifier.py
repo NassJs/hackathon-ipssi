@@ -180,8 +180,22 @@ def _extract_fields_for_type(doc_type: str, raw_text: str) -> Dict[str, Any]:
         fields["tva_amount"] = _extract_amount(text_norm, r"(?:TVA(?:\s*\d{1,2}\s*%?)?)")
         fields["amount_ttc"] = _extract_amount(text_norm, r"(?:TOTAL\s+TTC|MONTANT\s+TTC|\bTTC\b)")
     elif dt in ("bdc", "bon_commande", "bon de commande"):
-        fields["order_number"] = _first_match(r"\b(?:NUM(?:ERO)?|N°|NO)\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-_]{2,})\b", text_norm)
-        fields["date_signature"] = _first_match(r"\bDA(?:TE|LE)\s*[:\-]?\s*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})\b", text_norm)
+        fields["order_number"] = _first_match(r"\b(BDC[-_/ ]?\d{4}[-_/ ]?\d{1,6})\b", text_norm)
+        if not fields.get("order_number"):
+            fields["order_number"] = _first_match(
+                r"\b(?:NUM(?:ERO)?|N°|NO)\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-_]{2,})\b", text_norm
+            )
+        fields["date_signature"] = _first_match(
+            r"\bDATE\s+SIGNATURE\s*[:\-]?\s*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})\b", text_norm
+        )
+        if not fields.get("date_signature"):
+            fields["date_signature"] = _first_match(
+                r"\bSIGNATURE\s*[:\-]?\s*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})\b", text_norm
+            )
+        if not fields.get("date_signature"):
+            fields["date_signature"] = _first_match(
+                r"\bDA(?:TE|LE)\s*[:\-]?\s*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})\b", text_norm
+            )
         fields["amount_ht"] = _extract_amount(text_norm, r"(?:TOTAL\s+HT|MONTANT\s+HT|\bHT\b)")
         fields["tva_amount"] = _extract_amount(text_norm, r"(?:TVA(?:\s*\d{1,2}\s*%?)?)")
         fields["amount_ttc"] = _extract_amount(text_norm, r"(?:TOTAL\s+TTC|MONTANT\s+TTC|\bTTC\b)")
@@ -368,11 +382,11 @@ def _evaluate_conformity(
     }
 
 
-def _mean_conf_from_tsv(tsv_path: Path) -> float:
+def _mean_conf_from_tsv(tsv_path: Path) -> Optional[float]:
     # Extrait une "confiance OCR moyenne" depuis le TSV produit par Tesseract.
     # Les lignes avec conf négative sont ignorées (zones non reconnues).
     if not tsv_path.exists():
-        return 0.0
+        return None
     total = 0.0
     count = 0
     with tsv_path.open("r", encoding="utf-8", errors="ignore") as f:
@@ -391,7 +405,7 @@ def _mean_conf_from_tsv(tsv_path: Path) -> float:
                 continue
             total += conf_val
             count += 1
-    return round(total / count, 2) if count else 0.0
+    return round(total / count, 2) if count else None
 
 
 def _preprocess_for_ocr(img_path: Path, out_path: Path) -> Path:
@@ -471,7 +485,7 @@ def ocr_image_to_text(image_bytes: bytes, filename: str = "document.png", lang: 
 
         doc = fitz.open(stream=image_bytes, filetype="pdf")
         if doc.page_count <= 0:
-            return {"text": "", "ocr_conf_moy": 0.0}
+            return {"text": "", "ocr_conf_moy": None}
         page = doc.load_page(0)
         mat = fitz.Matrix(200 / 72, 200 / 72)
         pix = page.get_pixmap(matrix=mat, alpha=False)
