@@ -1,0 +1,55 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  classifier:
+    build:
+      context: ./document-classifier
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: 8000
+
+  api:
+    build:
+      context: ./hkt-backend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - classifier
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      MONGO_URI: mongodb://mongo:27017/hkt
+      CORS_ORIGIN: http://localhost:5173
+      JWT_SECRET: dev_secret
+      DOCUMENT_CLASSIFIER_URL: http://classifier:8000
+      ADMIN_EMAIL: admin@docuflow.local
+      ADMIN_PASSWORD: Admin123!
+    volumes:
+      - uploads_data:/app/uploads
+
+  front:
+    build:
+      context: ./hkt-frontend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:3000
+
+volumes:
+  mongo_data:
+  uploads_data:

@@ -18,6 +18,7 @@ const documentSchema = new mongoose.Schema(
       enum: ['pending', 'processing', 'validated', 'error'], 
       default: 'pending' 
     },
+    dossier_id: { type: String, index: true },
     file_path: { type: String, required: true }, 
     
     extracted_data: {
@@ -26,7 +27,8 @@ const documentSchema = new mongoose.Schema(
       montant_ht: Number,
       montant_ttc: Number,
       date_emission: Date,
-      date_expiration: Date
+      date_expiration: Date,
+      date_signature: Date
     },
     extracted_fields: {
       type: mongoose.Schema.Types.Mixed,
